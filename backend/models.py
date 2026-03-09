@@ -38,6 +38,10 @@ class PredictionHistory(Base):
     caloric_needs = Column(Float)
     bmi = Column(Float)
     bmi_category = Column(String)
+    diet_preference = Column(String)
+    allergies = Column(String)
+    health_status = Column(String)
+    nutrition_score = Column(Integer)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     owner = relationship("User", back_populates="predictions")

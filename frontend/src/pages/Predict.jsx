@@ -11,7 +11,9 @@ const Predict = () => {
         gender: 'male',
         height_cm: '',
         weight_kg: '',
-        activity_level: 'sedentary'
+        activity_level: 'sedentary',
+        diet_preference: 'none',
+        allergies: 'none'
     });
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -32,7 +34,7 @@ const Predict = () => {
             });
             setResult(response.data);
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        } catch (err) {
+        } catch (error) {
             alert("Prediction failed. Please try again.");
         } finally {
             setLoading(false);
@@ -128,6 +130,35 @@ const Predict = () => {
                                 </div>
                             </div>
 
+                            <div className="grid gap-6 sm:grid-cols-2">
+                                <div className="space-y-1.5">
+                                    <label className="block text-sm font-semibold text-slate-700">Dietary Preference</label>
+                                    <select
+                                        name="diet_preference"
+                                        value={formData.diet_preference}
+                                        onChange={handleChange}
+                                        className="flex h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-shadow"
+                                    >
+                                        <option value="none">None</option>
+                                        <option value="vegetarian">Vegetarian</option>
+                                        <option value="picky_eater">Picky Eater</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="block text-sm font-semibold text-slate-700">Allergies</label>
+                                    <select
+                                        name="allergies"
+                                        value={formData.allergies}
+                                        onChange={handleChange}
+                                        className="flex h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-shadow"
+                                    >
+                                        <option value="none">None</option>
+                                        <option value="nut_allergy">Nut Allergy</option>
+                                        <option value="lactose_intolerance">Lactose Intolerance</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <div className="pt-4">
                                 <Button type="submit" className="w-full text-base py-3 shadow-emerald-200 shadow-lg" isLoading={loading}>
                                     Generate Nutrition Plan
@@ -150,12 +181,15 @@ const Predict = () => {
                                     </div>
                                     <div className="mt-6 flex flex-wrap gap-3">
                                         <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
-                                            <p className="text-xs text-emerald-100">BMI Score</p>
-                                            <p className="font-bold text-lg">{result.bmi}</p>
+                                            <p className="text-xs text-emerald-100">Child Status</p>
+                                            <p className="font-bold text-lg">{result.health_status}</p>
                                         </div>
                                         <div className="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2">
-                                            <p className="text-xs text-emerald-100">Category</p>
-                                            <p className="font-bold text-lg">{result.bmi_category}</p>
+                                            <p className="text-xs text-emerald-100">Nutrition Score</p>
+                                            <div className="flex items-baseline gap-1">
+                                                <p className="font-bold text-lg">{result.nutrition_score}</p>
+                                                <span className="text-xs text-emerald-100">/100</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -165,16 +199,16 @@ const Predict = () => {
                             <Card className="p-0 overflow-hidden shadow-lg border-emerald-100">
                                 <div className="bg-slate-50 p-4 border-b border-slate-100 flex justify-between items-center">
                                     <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                                        <span>🍽️</span> Suggested Meal Plan
+                                        <span>🍽️</span> Daily Meal Plan
                                     </h3>
                                     <span className="text-xs font-medium bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">{result.message.replace('Plan: ', '')}</span>
                                 </div>
                                 <div className="divide-y divide-slate-100">
                                     {[
-                                        { label: 'Breakfast', icon: '🍳', bg: 'bg-orange-50', text: 'text-orange-600', content: result.nutrition_plan.breakfast },
-                                        { label: 'Lunch', icon: '🥗', bg: 'bg-green-50', text: 'text-green-600', content: result.nutrition_plan.lunch },
-                                        { label: 'Dinner', icon: '🍲', bg: 'bg-blue-50', text: 'text-blue-600', content: result.nutrition_plan.dinner },
-                                        { label: 'Snack', icon: '🍎', bg: 'bg-red-50', text: 'text-red-600', content: result.nutrition_plan.snacks }
+                                        { label: 'Breakfast', icon: '🍳', bg: 'bg-orange-50', text: 'text-orange-600', content: result.daily_meal_plan?.breakfast },
+                                        { label: 'Lunch', icon: '🥗', bg: 'bg-green-50', text: 'text-green-600', content: result.daily_meal_plan?.lunch },
+                                        { label: 'Dinner', icon: '🍲', bg: 'bg-blue-50', text: 'text-blue-600', content: result.daily_meal_plan?.dinner },
+                                        { label: 'Snack', icon: '🍎', bg: 'bg-red-50', text: 'text-red-600', content: result.daily_meal_plan?.snacks }
                                     ].map((meal, idx) => (
                                         <div key={idx} className="p-4 flex gap-4 hover:bg-slate-50 transition-colors">
                                             <div className={`flex-shrink-0 w-10 h-10 rounded-full ${meal.bg} flex items-center justify-center text-lg shadow-sm border border-slate-100`}>
@@ -187,6 +221,21 @@ const Predict = () => {
                                         </div>
                                     ))}
                                 </div>
+                            </Card>
+
+                            {/* Parent Guidance Card */}
+                            <Card className="p-6 border-l-4 border-l-amber-400 bg-amber-50/50 shadow-md">
+                                <h3 className="font-bold text-slate-800 flex items-center gap-2 mb-3">
+                                    <span>💡</span> Parent Guidance
+                                </h3>
+                                <ul className="space-y-2">
+                                    {result.parent_guidance?.map((tip, idx) => (
+                                        <li key={idx} className="flex gap-2 text-sm text-slate-700">
+                                            <span className="text-amber-500">•</span>
+                                            <span>{tip}</span>
+                                        </li>
+                                    ))}
+                                </ul>
                             </Card>
                         </div>
                     )}

@@ -70,34 +70,33 @@ def predict(
         bmi_category = "Obese"
 
     # Nutrition Plan Logic
-    calories = prediction
-    plan_type = ""
-    meals = {}
+    from ..services.nutrition_service import (
+        adjust_calories_for_age,
+        generate_meal_plan,
+        calculate_nutrition_score,
+        generate_parent_guidance
+    )
+    
+    base_calories = prediction
+    calories = adjust_calories_for_age(base_calories, input_data.age)
 
-    if calories < 1800:
-        plan_type = "Weight Loss"
-        meals = {
-            "breakfast": "Oatmeal with berries and nuts (300 kcal)",
-            "lunch": "Grilled chicken salad with olive oil dressing (500 kcal)",
-            "dinner": "Steamed fish with quinoa and vegetables (400 kcal)",
-            "snacks": "Greek yogurt or an apple (200 kcal)"
-        }
-    elif 1800 <= calories <= 2400:
-        plan_type = "Maintenance"
-        meals = {
-            "breakfast": "Scrambled eggs with whole grain toast and avocado (500 kcal)",
-            "lunch": "Turkey sandwich with plenty of veggies (700 kcal)",
-            "dinner": "Grilled salmon with sweet potato and asparagus (600 kcal)",
-            "snacks": "Handful of almonds and a banana (300 kcal)"
-        }
-    else: # > 2400
-        plan_type = "Muscle Gain"
-        meals = {
-            "breakfast": "Large omelet with cheese, spinach, and toast (700 kcal)",
-            "lunch": "Chicken breast with brown rice and broccoli (800 kcal)",
-            "dinner": "Lean steak with baked potato and mixed greens (800 kcal)",
-            "snacks": "Protein shake and peanut butter toast (500 kcal)"
-        }
+    is_veg = input_data.diet_preference and input_data.diet_preference.lower() == 'vegetarian'
+    is_nut_free = input_data.allergies and 'nut' in input_data.allergies.lower()
+
+    # Generate meal plan dynamically based on age logic
+    meals, plan_type = generate_meal_plan(
+        age=input_data.age,
+        calories=calories,
+        is_veg=is_veg,
+        is_nut_free=is_nut_free
+    )
+
+    # Calculate status and score
+    health_status = bmi_category
+    nutrition_score = calculate_nutrition_score(health_status, is_veg)
+
+    # Parent guidance
+    parent_guidance = generate_parent_guidance(input_data.age, health_status, is_veg)
 
     # Save history
     history = models.PredictionHistory(
@@ -107,17 +106,24 @@ def predict(
         height_cm=input_data.height_cm,
         weight_kg=input_data.weight_kg,
         activity_level=input_data.activity_level.value,
-        caloric_needs=prediction,
+        caloric_needs=calories,
         bmi=bmi,
-        bmi_category=bmi_category
+        bmi_category=bmi_category,
+        diet_preference=input_data.diet_preference,
+        allergies=input_data.allergies,
+        health_status=health_status,
+        nutrition_score=nutrition_score
     )
     db.add(history)
     db.commit()
 
     return {
-        "caloric_needs": round(prediction, 2),
+        "caloric_needs": round(calories, 2),
         "bmi": bmi,
         "bmi_category": bmi_category,
-        "nutrition_plan": meals,
+        "daily_meal_plan": meals,
+        "nutrition_score": nutrition_score,
+        "health_status": health_status,
+        "parent_guidance": parent_guidance,
         "message": f"Plan: {plan_type}"
     }

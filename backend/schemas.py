@@ -32,12 +32,17 @@ class PredictionInput(BaseModel):
     height_cm: float
     weight_kg: float
     activity_level: ActivityLevel
+    diet_preference: Optional[str] = None
+    allergies: Optional[str] = None
 
 class PredictionResponse(BaseModel):
     caloric_needs: float
     bmi: float
     bmi_category: str
-    nutrition_plan: dict
+    daily_meal_plan: dict
+    nutrition_score: int
+    health_status: str
+    parent_guidance: List[str]
     message: str
 
 class HistoryResponse(BaseModel):
@@ -48,6 +53,12 @@ class HistoryResponse(BaseModel):
     weight_kg: float
     activity_level: str
     caloric_needs: float
+    bmi: float
+    bmi_category: str
+    diet_preference: Optional[str] = None
+    allergies: Optional[str] = None
+    health_status: Optional[str] = None
+    nutrition_score: Optional[int] = None
     timestamp: datetime
 
     class Config:
