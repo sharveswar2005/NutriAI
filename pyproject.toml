@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nutriai"
+version = "0.1.0"
+description = "NutriAI - AI-powered nutrition analysis"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "sqlalchemy",
+    "pydantic",
+    "passlib[bcrypt]",
+    "python-jose[cryptography]",
+    "python-multipart",
+    "scikit-learn",
+    "pandas",
+    "numpy",
+    "email-validator",
+]
+
+[project.scripts]
+nutriai = "backend.main:app"
+
+[tool.setuptools]
+packages = ["backend"]

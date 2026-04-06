@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from .database import engine, Base
 from .routes import auth, predict, history, ai
 from .routes.predict import load_model
@@ -9,6 +11,9 @@ import os
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="NutriAI API")
+
+# Mount static files
+app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 
 # CORS
 origins = [
@@ -44,3 +49,10 @@ async def startup_event():
 @app.get("/")
 def read_root():
     return {"message": "Welcome to NutriAI API"}
+
+@app.get("/{path:path}")
+async def serve_frontend(path: str):
+    # Serve index.html for all non-API routes
+    if not path.startswith("api/") and not path.startswith("docs") and not path.startswith("redoc"):
+        return FileResponse("index.html")
+    return {"message": "Not found"}
