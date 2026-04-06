@@ -13,7 +13,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="NutriAI API")
 
 # Mount static files
-app.mount("/assets", StaticFiles(directory="assets"), name="assets")
+app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="assets")
 
 # CORS
 origins = [
@@ -24,6 +24,7 @@ origins = [
     "http://127.0.0.1:5174",
     "http://localhost:5175",
     "http://127.0.0.1:5175",
+    "https://nutriai-api.onrender.com", # Add render URL if needed, but not strictly necessary for CORS right now if it's served securely from the same origin.
 ]
 
 app.add_middleware(
@@ -42,6 +43,8 @@ app.include_router(ai.router, prefix="/ai", tags=["AI"])
 
 @app.on_event("startup")
 async def startup_event():
+    # Ensure dist and assets directories exist
+    os.makedirs("frontend/dist/assets", exist_ok=True)
     # Load model on startup
     if os.path.exists("backend/model/calorie_model.pkl"):
         load_model()
@@ -54,5 +57,5 @@ def read_root():
 async def serve_frontend(path: str):
     # Serve index.html for all non-API routes
     if not path.startswith("api/") and not path.startswith("docs") and not path.startswith("redoc"):
-        return FileResponse("index.html")
+        return FileResponse("frontend/dist/index.html")
     return {"message": "Not found"}
