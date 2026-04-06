@@ -1,10 +1,35 @@
 services:
+  # 1. Python Fast API Backend
   - type: web
-    name: nutriai-api
-    env: docker
-    region: oregon
-    plan: free
-    dockerfilePath: ./Dockerfile
+    name: nutriai-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: NODE_ENV
-        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nutriai-db
+          property: connectionString
+      - key: FRONTEND_URL
+        value: https://nutriai-frontend.onrender.com # Used for CORS, must match frontend static sitename
+
+  # 2. React JS Frontend Static Site
+  - type: web
+    name: nutriai-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    rootDir: frontend
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: nutriai-backend
+          envVarKey: RENDER_EXTERNAL_URL
+
+databases:
+  # 3. PostgreSQL Database
+  - name: nutriai-db
+    databaseName: nutriai
+    user: nutriai_user
+    plan: free

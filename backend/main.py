@@ -12,12 +12,6 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="NutriAI API")
 
-# Ensure dist and assets directories exist before mounting static files
-os.makedirs("frontend/dist/assets", exist_ok=True)
-
-# Mount static files
-app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="assets")
-
 # CORS
 origins = [
     "http://localhost:5173",  # Vite default port
@@ -27,8 +21,11 @@ origins = [
     "http://127.0.0.1:5174",
     "http://localhost:5175",
     "http://127.0.0.1:5175",
-    "https://nutriai-api.onrender.com", # Add render URL if needed, but not strictly necessary for CORS right now if it's served securely from the same origin.
 ]
+
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    origins.append(frontend_url)
 
 app.add_middleware(
     CORSMiddleware,
@@ -53,10 +50,3 @@ async def startup_event():
 @app.get("/")
 def read_root():
     return {"message": "Welcome to NutriAI API"}
-
-@app.get("/{path:path}")
-async def serve_frontend(path: str):
-    # Serve index.html for all non-API routes
-    if not path.startswith("api/") and not path.startswith("docs") and not path.startswith("redoc"):
-        return FileResponse("frontend/dist/index.html")
-    return {"message": "Not found"}
