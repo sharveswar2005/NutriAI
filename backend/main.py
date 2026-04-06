@@ -12,6 +12,9 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="NutriAI API")
 
+# Ensure dist and assets directories exist before mounting static files
+os.makedirs("frontend/dist/assets", exist_ok=True)
+
 # Mount static files
 app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="assets")
 
@@ -43,8 +46,6 @@ app.include_router(ai.router, prefix="/ai", tags=["AI"])
 
 @app.on_event("startup")
 async def startup_event():
-    # Ensure dist and assets directories exist
-    os.makedirs("frontend/dist/assets", exist_ok=True)
     # Load model on startup
     if os.path.exists("backend/model/calorie_model.pkl"):
         load_model()
