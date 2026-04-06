@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
-from .routes import auth, predict, history
+from .routes import auth, predict, history, ai
 from .routes.predict import load_model
 import os
 
@@ -33,6 +33,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(predict.router)
 app.include_router(history.router)
+app.include_router(ai.router, prefix="/ai", tags=["AI"])
 
 @app.on_event("startup")
 async def startup_event():

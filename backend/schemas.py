@@ -63,3 +63,22 @@ class HistoryResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class RecommendationRequest(BaseModel):
+    weight_kg: float
+    goal: str
+
+class RecommendationResponse(BaseModel):
+    calorie_estimation: float
+    food_suggestions: List[str]
+
+class QueryRequest(BaseModel):
+    query: str
+
+class QueryResponse(BaseModel):
+    response: str
+
+class InsightsResponse(BaseModel):
+    low_stock_items: List[str]
+    restocking_suggestions: List[str]
+    most_used_items: List[str]
