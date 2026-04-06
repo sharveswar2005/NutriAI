@@ -10,25 +10,9 @@ services:
         fromDatabase:
           name: nutriai-db
           property: connectionString
-      - key: FRONTEND_URL
-        value: https://nutriai-z5di.vercel.app # Used for CORS, must match frontend static sitename
-
-  # 2. React JS Frontend Static Site
-  - type: web
-    name: nutriai-frontend
-    env: static
-    buildCommand: npm install && npm run build
-    staticPublishPath: ./dist
-    rootDir: frontend
-    envVars:
-      - key: VITE_API_URL
-        fromService:
-          type: web
-          name: nutriai-backend
-          envVarKey: RENDER_EXTERNAL_URL
 
 databases:
-  # 3. PostgreSQL Database
+  # 2. PostgreSQL Database
   - name: nutriai-db
     databaseName: nutriai
     user: nutriai_user
