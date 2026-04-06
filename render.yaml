@@ -11,7 +11,7 @@ services:
           name: nutriai-db
           property: connectionString
       - key: FRONTEND_URL
-        value: https://nutriai-frontend.onrender.com # Used for CORS, must match frontend static sitename
+        value: https://nutriai-z5di.vercel.app # Used for CORS, must match frontend static sitename
 
   # 2. React JS Frontend Static Site
   - type: web
