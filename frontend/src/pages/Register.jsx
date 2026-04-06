@@ -21,7 +21,12 @@ const Register = () => {
             await api.post('/auth/register', { email, password });
             navigate('/login');
         } catch (err) {
-            setError('Registration failed. Email might be already securely registered.');
+            console.error("Registration error:", err);
+            if (err.response && err.response.data && err.response.data.detail) {
+                setError(err.response.data.detail);
+            } else {
+                setError(err.message || 'Registration failed due to network error.');
+            }
         } finally {
             setLoading(false);
         }

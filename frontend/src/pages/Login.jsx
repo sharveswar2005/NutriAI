@@ -22,7 +22,12 @@ const Login = () => {
             await login(email, password);
             navigate('/dashboard');
         } catch (err) {
-            setError('Invalid email or password. Please try again.');
+            console.error("Login error:", err);
+            if (err.response && err.response.data && err.response.data.detail) {
+                setError(err.response.data.detail);
+            } else {
+                setError(err.message || 'Login failed due to network error.');
+            }
         } finally {
             setLoading(false);
         }
